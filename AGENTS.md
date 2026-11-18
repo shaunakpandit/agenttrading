@@ -5,7 +5,10 @@ A stdlib-only Go toolkit for writing and testing daily-bar swing strategies on U
 ## Setup
 
 `MASSIVE_API_KEY` must be set (Massive, formerly Polygon). You can also put it in `.env` and run
-`set -a; . ./.env; set +a`. Bars are cached in `.cache/`, so repeat runs make no network calls.
+`set -a; . ./.env; set +a` (`.env` is gitignored, never commit it). Bars are cached in `.cache/`,
+so repeat runs make no network calls. The current plan returns about 5 years of daily bars (from
+2021-11-19), so `cmd/run` uses that as warm-up, scores in-sample 2022-09-01 → 2025-11-17, and
+holds out the last year.
 
 ## Loop for a new strategy
 
@@ -38,3 +41,4 @@ Pick a ticker with `go run ./cmd/run -screen TSLA,NVDA,AMD,PLTR` (dollar volume,
   `CheckLookahead(b, s)` returns an error if a signal looks ahead.
 
 Run `go test ./...` for tests on synthetic data (no network).
+- The trade log starts a new trade on every change in position size, so fractional-size strategies show many trades.
