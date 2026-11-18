@@ -16,6 +16,9 @@ holds out the last year.
 2. Run `go run ./cmd/run -ticker TSLA`. Every strategy is lookahead-checked, then scored in-sample.
 3. Run `go run ./cmd/run -ticker TSLA -trades sNN_name` to inspect its trades.
 4. Look at the held-out window (`-oos`) only once you're done iterating. Each peek is another fit.
+5. Judge robustness across stocks with `-ticker TSLA,NVDA,AMD,...`: one row per strategy with
+   medians, how many tickers beat buy and hold's Sharpe, and Sharpe per ticker. See RESULTS.md
+   for what has already been tried.
 
 Pick a ticker with `go run ./cmd/run -screen TSLA,NVDA,AMD,PLTR` (dollar volume, volatility).
 
@@ -32,7 +35,7 @@ Pick a ticker with `go run ./cmd/run -screen TSLA,NVDA,AMD,PLTR` (dollar volume,
 - Data: `Fetch(ticker, from, to)`, `Bars{Time, Open, High, Low, Close, Volume}`, `b.Len()`,
   `b.Slice(i, j)`, `Stats(b)`.
 - Indicators (same length as the input, NaN during warm-up): `SMA EMA RMA StdDev Highest Lowest
-  Shift RSI ATR MACD Bollinger CrossOver CrossUnder`.
+  Shift RSI ATR ADX MACD Bollinger CrossOver CrossUnder`.
 - Rules: `EnterExit(enter, exit []bool, side)` holds `side` from an enter until the next exit.
   Use a plain loop when a rule needs state, such as a trailing stop.
 - Testing: `Backtest(name, b, s, Config{CostBps, From, To})` returns a `Result` with `Return`,
@@ -40,5 +43,7 @@ Pick a ticker with `go run ./cmd/run -screen TSLA,NVDA,AMD,PLTR` (dollar volume,
   `AvgWin`, `AvgLoss`, `AvgBars`, `Exposure`, `Equity` and `TradeLog`. `Table(results...)` formats them.
   `CheckLookahead(b, s)` returns an error if a signal looks ahead.
 
+The trade log starts a new trade on every change in position size, so fractional-size strategies
+show many trades.
+
 Run `go test ./...` for tests on synthetic data (no network).
-- The trade log starts a new trade on every change in position size, so fractional-size strategies show many trades.

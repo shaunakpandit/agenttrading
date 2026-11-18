@@ -93,4 +93,12 @@ func TestIndicators(t *testing.T) {
 	if r := RSI(x, 2); r[4] != 100 {
 		t.Fatalf("RSI %v", r)
 	}
+	// a steady uptrend has no down moves, so ADX converges to 100
+	b := randomWalk(60)
+	for i := range b.Close {
+		b.Close[i], b.High[i], b.Low[i] = float64(100+i), float64(101+i), float64(99+i)
+	}
+	if a := ADX(b, 14); !math.IsNaN(a[10]) || math.Abs(a[59]-100) > 1e-9 {
+		t.Fatalf("ADX %v", a)
+	}
 }

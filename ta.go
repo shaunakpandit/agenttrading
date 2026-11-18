@@ -163,3 +163,26 @@ func EnterExit(enter, exit []bool, side float64) []float64 {
 	}
 	return out
 }
+
+// ADX is Wilder's average directional index: trend strength from 0 to 100, regardless of direction.
+// Above about 25 the market is trending; below about 20 it is ranging.
+func ADX(b Bars, n int) []float64 {
+	plus, minus := make([]float64, b.Len()), make([]float64, b.Len())
+	plus[0], minus[0] = math.NaN(), math.NaN()
+	for i := 1; i < b.Len(); i++ {
+		up, down := b.High[i]-b.High[i-1], b.Low[i-1]-b.Low[i]
+		if up > down && up > 0 {
+			plus[i] = up
+		}
+		if down > up && down > 0 {
+			minus[i] = down
+		}
+	}
+	atr, plusSmoothed, minusSmoothed := ATR(b, n), RMA(plus, n), RMA(minus, n)
+	dx := make([]float64, b.Len())
+	for i := range dx {
+		plusDI, minusDI := plusSmoothed[i]/atr[i], minusSmoothed[i]/atr[i]
+		dx[i] = 100 * math.Abs(plusDI-minusDI) / (plusDI + minusDI)
+	}
+	return RMA(dx, n)
+}
